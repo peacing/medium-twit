@@ -1,8 +1,10 @@
+import argparse
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from time import sleep
 from random import random, randint
+
 
 twitter_hashes = {
     'data-engineering': '#Data',
@@ -79,7 +81,7 @@ def get_articles(tag, num_articles=5):
             twitter = ausoup.select("a[href*=twitter]")
 
             if twitter:
-                handle = '@' + str(twitter[0])
+                handle = '@' + str(twitter[0].get('href')).split('/')[-1]
             else:
                 handle = None
                 
@@ -104,9 +106,9 @@ def generate_tweets(articles, tag):
 
         if art['handle'] and art['publication']:
             print(f"\n{nice_word} by {art['handle']} {art['article_title']}  in {art['publication']} {twitter_hashes[tag]} {art['article_url']}")
-        if art['handle']:
+        elif art['handle']:
             print(f"\n{nice_word} titled {art['article_title']} by {art['handle']} {twitter_hashes[tag]} {art['article_url']}")
-        if art['publication']:
+        elif art['publication']:
             print(f"\n{nice_word} by {art['author_name']} in {art['publication']}: {art['article_title']} {twitter_hashes[tag]} {art['article_url']}")
         else:
             print(f"\n{nice_word} by {art['author_name']} titled: {art['article_title']}  {twitter_hashes[tag]} {art['article_url']}")
@@ -114,11 +116,23 @@ def generate_tweets(articles, tag):
 
 if __name__=='__main__':
 
-    tags = ['data-engineering', 'data-science', 'aws', 'analytics', 'data']
-    # tags = ['data-engineering']
+    aparser = argparse.ArgumentParser()
+    aparser.add_argument("-t", "--tag", required=False, default='all')
+    
+    args = aparser.parse_args()
+    tag = args.tag
+
+    if tag == 'all':
+
+        tags = ['data-engineering', 'data-science', 'aws', 'analytics', 'data']
+
+    else:
+        tags = [tag]
     
 
     for tag in tags:
+
+        print(f'\nFinding tweets for tag: {tag}\n')
 
         sleep(3)
 
